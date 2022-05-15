@@ -1,11 +1,15 @@
 #Imports
+from pickletools import pyfloat
+import re
+from telnetlib import GA
 import pygame, sys
 import numpy as np
 
 #Constants and variables and inits
 pygame.init()
 board = np.zeros((3,3))
-player = 1
+player = 2
+GameOver = False
 
 SCREEN_SIZE = (600,600)
 BACKGROUND = (30, 33, 38)
@@ -53,14 +57,60 @@ def fullBoard():
     return True
 
 def win(player):
-    pass
+    #vertical win
+    for col in range(3):
+        if board[0][col] == board[1][col] == board[2][col] == player:
+            draw_win_vert(col, player)
+            return True
+    #horizontal win
+    for row in range(3):
+        if board[row][0] == board[row][1] == board[row][2] == player:
+            draw_win_hor(row, player)
+            return True
+    #diagnoal win
+    if board[0][0] == board[1][1] == board[2][2] == player:
+        draw_win_diag(1, player)
+        return True
+    if board[2][0] == board[1][1] == board[0][2] == player:
+        draw_win_diag(2, player)
+        return True
+    return False
 
-def draw_win():
-    pass    
+def draw_win_vert(col, player):
+    posx = col*200+100
+    if player == 1:
+        color = XCOLOR
+    elif player == 2:
+        color = CIRCLECOLOR
+    pygame.draw.line(screen, color, (posx, 15), (posx, 600-15), 10)
+
+def draw_win_hor(row, player):
+    posy = row*200+100
+    if player == 1:
+        color = XCOLOR
+    elif player == 2:
+        color = CIRCLECOLOR
+    pygame.draw.line(screen, color, (15 , posy), (600-15, posy), 10)    
+
+def draw_win_diag(dir, player):
+    if player == 1:
+        color = XCOLOR
+    elif player == 2:
+        color = CIRCLECOLOR
+    if dir == 2:
+        pygame.draw.line(screen, color, (20, 600-20), (600-20, 20), 10)
+    elif dir == 1:
+        pygame.draw.line(screen, color, (20, 20), (600-20, 600-20), 10)
 
 def restart():
-    pass
+    screen.fill(BACKGROUND)
+    draw_grid()
+    player = 2
+    for row in range(3):
+        for col in range(3):
+            board[row][col] = 0
 
+20
 #main loop
 draw_grid()
 
@@ -68,7 +118,7 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and not GameOver:
             mouseX = event.pos[0]
             mouseY = event.pos[1]
             clickedRow = int(mouseY//200)
@@ -76,9 +126,17 @@ while True:
             if available_sqr(clickedRow, clickedCol):
                 mark_sqr(clickedRow, clickedCol, player)
                 draw_shape()
+                if win(player):
+                    GameOver = True
+                    print(GameOver)
                 if player == 1:
                     player = 2
                 else:
                     player = 1
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                restart()
+                GameOver = False
+                
 
     pygame.display.update()
