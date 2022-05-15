@@ -1,64 +1,73 @@
-import pygame
-import sys
+import pygame, sys
 import numpy as np
-from constants import *
 
-# section of pygame
+#Constants and variables
 pygame.init()
-screen = pygame.display.set_mode((width, HIGHT))
-pygame.display.set_caption('Tic Tac Toe Game')
-screen.fill(BG_COLOR)
+board = np.zeros((3,3))
+player = 1
+
+SCREEN_SIZE = (600,600)
+BACKGROUND = (30, 33, 38)
+LINE_COLOR = (189, 94, 21)
+SPACE = 50
+CIRCLECOLOR = (184, 196, 209)
+XCOLOR = (100, 114, 130)
+
+screen = pygame.display.set_mode(SCREEN_SIZE)
+pygame.display.set_caption("Tic Tac Toe")
+screen.fill(BACKGROUND)
 
 
-class Board:
-    def __init__(self):
-        self.squares = np.zeros((ROW, COLS))
+#Function defs
+def draw_grid():
+    pygame.draw.line(screen, LINE_COLOR, (200, 5), (200, 595), 4 )
+    pygame.draw.line(screen, LINE_COLOR, (400, 5), (400, 595), 4 )
+    pygame.draw.line(screen, LINE_COLOR, (5, 200), (595, 200), 4 )
+    pygame.draw.line(screen, LINE_COLOR, (5, 400), (595, 400), 4 )
+def draw_shape():
+    for row in range(3):
+        for col in range(3):
+            if board[row][col] == 1:
+                pygame.draw.circle(screen, CIRCLECOLOR, (int(col*200+100), int(row*200+100)) , 60, 10)
+            elif board[row][col] == 2:
+                pygame.draw.line(screen, XCOLOR , (col*200+SPACE, row*200+200-SPACE) , (col*200+200-SPACE, row*200+SPACE), 20)
+                pygame.draw.line(screen, XCOLOR , (col*200+SPACE, row*200+SPACE) , (col*200+200-SPACE, row*200+200-SPACE) , 20)
+               
+def mark_sqr(row, col, player):
+    board[row][col] = player
+    print(board)
+def available_sqr(row, col):
+    return board[row][col] == 0
+def fullBoard():
+    for row in range(3):
+        for col in range(3):
+            if board[row][col] == 0:
+                return False
+    return True
+def win(player):
+    
+def draw_win():
+    
+def restart():
 
-    def mark_sqr(self, row, col, player):
-        self.squares[row][col] = player
+#main loop
+draw_grid()
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouseX = event.pos[0]
+            mouseY = event.pos[1]
+            clickedRow = int(mouseY//200)
+            clickedCol = int(mouseX//200)
+            if available_sqr(clickedRow, clickedCol):
+                mark_sqr(clickedRow, clickedCol, player)
+                draw_shape()
+                if player == 1:
+                    player = 2
+                else:
+                    player = 1
 
-    def empty_sqr(self, row, col):
-        return self.squares[row][col] == 0
+    pygame.display.update()
 
-
-class Game:
-
-    def __init__(self):
-        self.board = Board()
-        self.player = 1
-        self.show_lines()
-
-    def show_lines(self):  # for drawing vertical and horizontal line
-        # vertical
-        pygame.draw.line(screen, Line_Color, (Squaresize, 0),
-                         (Squaresize, HIGHT), Line_width)
-        pygame.draw.line(screen, Line_Color, (width-Squaresize, 0),
-                         (width-Squaresize, HIGHT), Line_width)
-        # horizontal
-        pygame.draw.line(screen, Line_Color, (0, Squaresize),
-                         (width, Squaresize), Line_width)
-        pygame.draw.line(screen, Line_Color, (0, HIGHT-Squaresize),
-                         (width, HIGHT-Squaresize), Line_width)
-
-
-def main():
-    game = Game()
-    board = game.board
-
-    while True:
-
-        for event in pygame.event.get():
-
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = event.pos
-                row = pos[1] // Squaresize
-                col = pos[0] // Squaresize
-           
-
-        pygame.display.update()
-
-
-main()
