@@ -1,7 +1,8 @@
+#Imports
 import pygame, sys
 import numpy as np
 
-#Constants and variables
+#Constants and variables and inits
 pygame.init()
 board = np.zeros((3,3))
 player = 1
@@ -19,11 +20,14 @@ screen.fill(BACKGROUND)
 
 
 #Function defs
+
 def draw_grid():
     pygame.draw.line(screen, LINE_COLOR, (200, 5), (200, 595), 4 )
     pygame.draw.line(screen, LINE_COLOR, (400, 5), (400, 595), 4 )
     pygame.draw.line(screen, LINE_COLOR, (5, 200), (595, 200), 4 )
     pygame.draw.line(screen, LINE_COLOR, (5, 400), (595, 400), 4 )
+
+#drawign the Xs and Os
 def draw_shape():
     for row in range(3):
         for col in range(3):
@@ -32,26 +36,34 @@ def draw_shape():
             elif board[row][col] == 2:
                 pygame.draw.line(screen, XCOLOR , (col*200+SPACE, row*200+200-SPACE) , (col*200+200-SPACE, row*200+SPACE), 20)
                 pygame.draw.line(screen, XCOLOR , (col*200+SPACE, row*200+SPACE) , (col*200+200-SPACE, row*200+200-SPACE) , 20)
-               
+
+#make a play
 def mark_sqr(row, col, player):
     board[row][col] = player
     print(board)
+
 def available_sqr(row, col):
     return board[row][col] == 0
+
 def fullBoard():
     for row in range(3):
         for col in range(3):
             if board[row][col] == 0:
                 return False
     return True
+
 def win(player):
-    
+    pass
+
 def draw_win():
-    
+    pass    
+
 def restart():
+    pass
 
 #main loop
 draw_grid()
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -70,4 +82,3 @@ while True:
                     player = 1
 
     pygame.display.update()
-
