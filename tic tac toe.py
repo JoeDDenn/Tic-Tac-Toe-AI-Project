@@ -13,6 +13,7 @@ board = np.zeros((3,3))
 player = 1
 turn = True
 GameOver = False
+#sys.setrecursionlimit(100000)
 
 SCREEN_SIZE = (600,600)
 BACKGROUND = (30, 33, 38)
@@ -103,25 +104,25 @@ def draw_shape():
 def mark_sqr(board, row, col, player):
     board[row][col] = player
 
-def available_sqr(row, col):
+def available_sqr(board, row, col):
     return board[row][col] == 0
 
 def getEmptySqr(board):
     emptySqr = []
     for row in range(3):
         for col in range(3):
-            if available_sqr(row, col):
+            if available_sqr(board, row, col):
                 emptySqr.append((row, col))
     return emptySqr
 
-def fullBoard():
+def fullBoard(board):
     for row in range(3):
         for col in range(3):
             if board[row][col] == 0:
                 return False
     return True
 
-def win(player):
+def win(board,player):
     #vertical win
     for col in range(3):
         if board[0][col] == board[1][col] == board[2][col] == player:
@@ -189,12 +190,11 @@ def twoPlayerLoop():
                 mouseY = event.pos[1]
                 clickedRow = int(mouseY//200)
                 clickedCol = int(mouseX//200)
-                if available_sqr(clickedRow, clickedCol):
+                if available_sqr(board, clickedRow, clickedCol):
                     mark_sqr(board, clickedRow, clickedCol, player)
                     draw_shape()
-                    if win(player):
+                    if win(board, player):
                         GameOver = True
-                        print(GameOver)
                     if player == 1:
                         player = 2
                     else:
@@ -220,7 +220,7 @@ def RandEval():
        sqr = emptysqr[idx]
        mark_sqr(board, sqr[0], sqr[1], 2)
        draw_shape()
-       if win(2):
+       if win(board, 2):
             GameOver = True
        turn = True
 
@@ -234,17 +234,17 @@ def mmMove(move):
     elif not GameOver:  
        mark_sqr(board, move[0], move[1], 2)
        draw_shape()
-       if win(2):
+       if win(board, 2):
             GameOver = True
        turn = True
 
 def minimax(board, max):
-    case = finalState()
+    case = finalState(board)
     if case == 1:
         return 1, None
     elif case == 2:
         return -1, None
-    elif fullBoard():
+    elif fullBoard(board):
         return 0, None
     if max:
         maxEval = -100
@@ -254,7 +254,6 @@ def minimax(board, max):
             tBoard = copy.deepcopy(board)
             mark_sqr(tBoard, row, col, 1)
             eval = minimax(tBoard, False)[0]
-            print(eval)
             if eval > maxEval:
                 maxEval = eval
                 bestMove = (row, col)
@@ -267,19 +266,27 @@ def minimax(board, max):
             tBoard = copy.deepcopy(board)
             mark_sqr(tBoard, row, col, 2)
             eval = minimax(tBoard, True)[0]
-            print(eval)
             if eval < minEval:
                 minEval = eval
                 bestMove = (row, col)
         return minEval, bestMove
 
-def finalState():
-    if win(1):
-        return 1
-    elif win(2):
-        return 2
-    else:
-        return 0
+def finalState(board):
+
+    #vertical win
+    for col in range(3):
+        if board[0][col] == board[1][col] == board[2][col] != 0:
+            return board[2][col]
+    #horizontal win
+    for row in range(3):
+        if board[row][0] == board[row][1] == board[row][2] != 0:
+            return board[row][2]
+    #diagnoal win
+    if board[0][0] == board[1][1] == board[2][2] !=0:
+        return board[2][2]
+    if board[2][0] == board[1][1] == board[0][2] !=0:
+        return board[0][2]
+    return 0
 
 def vsRandAILoop():
     global turn
@@ -297,10 +304,10 @@ def vsRandAILoop():
                 mouseY = event.pos[1]
                 clickedRow = int(mouseY//200)
                 clickedCol = int(mouseX//200)
-                if available_sqr(clickedRow, clickedCol):
+                if available_sqr(board, clickedRow, clickedCol):
                     mark_sqr(board, clickedRow, clickedCol, 1)
                     draw_shape()
-                    if win(1):
+                    if win(board,1):
                         GameOver = True
                 turn = False
                 RandEval()
@@ -320,6 +327,7 @@ def vsAILoop():
     global player
     global GameOver
     player = 1
+
     screen.fill(BACKGROUND)
     draw_grid()
     while True:
@@ -331,15 +339,18 @@ def vsAILoop():
                 mouseY = event.pos[1]
                 clickedRow = int(mouseY//200)
                 clickedCol = int(mouseX//200)
-                if available_sqr(clickedRow, clickedCol):
+                if available_sqr(board, clickedRow, clickedCol):
+
                     mark_sqr(board, clickedRow, clickedCol, 1)
                     draw_shape()
-                    if win(1):
+                    pygame.display.update()
+                    if win(board, 1):
                         GameOver = True
                 turn = False
                 eval, move = minimax(board, False)
-                print(eval)
+                print(f"AI has chosen to mark {move} with an evaluation of {eval}")
                 mmMove(move)
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     restart()
